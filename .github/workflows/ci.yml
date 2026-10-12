@@ -1,0 +1,31 @@
+name: CI - Docker Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+
+    env:
+      APP_URL: http://localhost:8080
+      DB_DATABASE: db_fajru_cikadongdong
+      DB_USERNAME: root
+      DB_PASSWORD: ci-password
+      WHATSAPP_API_KEY: ci-api-key
+      WHATSAPP_DEVICE_KEY: ci-device-key
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose
+        run: docker compose config
+
+      - name: Build Docker image
+        run: docker build -t cikadongdong-river-tubing:test .
