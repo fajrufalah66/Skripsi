@@ -1,4 +1,4 @@
-name: CI - Docker Build
+name: CI/CD - Docker
 
 on:
   push:
@@ -8,9 +8,17 @@ on:
     branches:
       - main
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
-  docker-build:
+  docker:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
 
     env:
       APP_URL: http://localhost:8080
@@ -27,5 +35,29 @@ jobs:
       - name: Validate Docker Compose
         run: docker compose config
 
-      - name: Build Docker image
-        run: docker build -t cikadongdong-river-tubing:test .
+      - name: Login to GHCR
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        if: github.event_name == 'push'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha
+
+      - name: Build and Push Docker Image
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
