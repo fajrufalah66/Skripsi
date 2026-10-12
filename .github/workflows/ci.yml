@@ -65,15 +65,10 @@ jobs:
   deploy:
     needs: docker
     if: github.event_name == 'push'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Deploy to lab2
-        uses: appleboy/ssh-action@v1.2.2
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /opt/devops/cikadongdong
-            ./deploy.sh
+        run: |
+          cd /opt/devops/cikadongdong
+          ./deploy.sh
