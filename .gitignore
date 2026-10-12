@@ -1,0 +1,13 @@
+/vendor/
+
+/.env
+/.env.*
+
+!.env.example
+
+*.log
+*.backup
+.DS_Store
+
+# Database dump
+db-3.sql
